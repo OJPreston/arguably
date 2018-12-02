@@ -1,0 +1,257 @@
+---
+title: "Selling Honey"
+author: "Byron Williams"
+date: "2018-12-01"
+output: html_document
+# Exported by Mendeley
+bibliography: _data/references.bib
+# http://editor.citationstyles.org/styleInfo/?styleId=http%3A%2F%2Fwww.zotero.org%2Fstyles%2Fspringer-vancouver-brackets
+csl: _data/references.csl
+link-citations: yes
+---
+
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE, fig.width=8, fig.height=8)
+
+library(tidyverse)
+library(lubridate)
+library(maps)
+library(mapproj)
+library(knitr)
+library(kableExtra)
+library(gganimate)
+
+jars <- read_csv("_data/jars_20181127.csv")
+sites <- read_csv("_data/sites_ll_20181127.csv")
+
+n_suppliers <- sites %>% count(supplier_name) %>% nrow()
+n_rows <- nrow(jars)
+min_date <- min(jars$checked_at) %>% as_date()
+max_date <- max(jars$checked_at) %>% as_date()
+just_one <- 1/n_suppliers
+
+# Extract necessary info from site data and clean col names
+honey <-
+  jars %>% 
+  left_join(sites, by = "check_id") %>% 
+  select(c(2,4,5,6,8,9,10,14,15,16,18,20,21,25,26)) %>% 
+  setNames(c("check_id", 
+             "check_date", 
+             "check_status",
+             "name",
+             "price",
+             "weight",
+             "quantity_in_stock",
+             "supplier",
+             "beekeeper",
+             "postcode",
+             "sell_direct",
+             "packaging",
+             "honey_type",
+             "lat",
+             "long")) %>% 
+  mutate(check_date = as_date(check_date))
+
+# Calculate my own price (£) per kilo
+honey <-
+  honey %>% 
+  mutate(price_per_kilo = (1000/weight*price)/100)
+
+honey <-
+  honey %>% 
+  mutate(quantity_in_stock = strtoi(quantity_in_stock, 10))
+
+# Fix spelling errors
+honey <-
+  honey %>% 
+  mutate(honey_type = str_replace_all(honey_type, "blosson", "blossom"))
+
+# Remove null data and what appear to be errors in scrape
+honey <-
+  honey %>% 
+  filter(weight > 0,  # no weight
+         weight < 5000,
+         price_per_kilo < 50,  # price errors? 
+         supplier != "Honeyguides")  # Poor pricing info
+
+honey <- 
+  honey %>% 
+  mutate(weight_bucket = if_else(
+    weight %in% 0:45, 42, 
+  if_else(
+    weight %in% 113:200, 140,
+  if_else(
+    weight %in% 224:227, 227, 
+  if_else(
+    weight %in% 240:290, 240, 
+  if_else(
+    weight %in% 340:380, 340, 
+  if_else(
+    weight >= 500, 500, weight)))))))
+
+honey <- 
+  honey %>% 
+  mutate(manual_bin = cut(weight, 
+                   breaks = c(0,50,225,330,500,1000,Inf), 
+                   labels = c("Taster","Small","Medium","Large","XL","1kg+")))
+
+honey$cluster <- kmeans(honey$weight, centers = 6)$clust
+
+
+```
+
+![](/images/arguably_honeyguides.png){width=100%}
+As an avid beekeeper I was trying to calculate the price at which I should be
+selling honey for. From cursary glances we could see that online honey prices
+are higher that in store. As we don't have an army of weekly or monthly price
+checkers across the country we retreived the prices from honey sellers across
+the country.
+
+## How to get the data?
+
+We have created a list of beekeepers, local farm shops and delis which list
+local honey on their websites. Every day a computer program will visit the
+sites and tell us what the price is.
+
+## Who's on our list?
+
+There are `r n_suppliers` suppliers on our list at time of publication. Here's 
+a sample of these suppliers:
+
+```{r echo=FALSE}
+sites %>%
+  head(5) %>%
+  select("supplier_name", "supplier_is_beekeeper", "supplier_postcode", "packaging_type") %>%
+  kable(col.names = c("Supplier Name", "Is Beekeeper?", "Postcode", "Packaging Type")) %>%
+  kable_styling()
+```
+
+We accept this is a small percentage of beekeepers in the country and still a small percentage of the members of the Bee Farmers complement of 450 are represented here [@Association2018]. This seems to be for a number of reasons:
+
+1. Bee Farmers tend to focus on honey production for bulk sales. This honey will
+be sold to market at around £11/kg
+2. Most Bee Farmers do not have websites (apart from Quince Honey Farm, Becky's Bees and Honeyfields Bee Farm).
+3. Bee Farmers do not always focus on producing honey for sale, some are more interested
+in producing nucleus colonies for next year's sales
+
+## What size jars to use?
+
+Often small beekeepers in local associations price fix and agree to sell at
+£5/lb (£5/454g), so this is an average of £11.01/kg. Whilst traditional, it's
+not actually the the most popular size of jar in the UK.
+
+```{r echo = FALSE}
+
+honey %>% 
+  group_by(weight_bucket) %>%
+  summarize(total_weights = sum(weight_bucket), ppk = mean(price_per_kilo))%>%
+  mutate(pct = total_weights / sum(total_weights) * 100) %>%
+  select("weight_bucket", "pct") %>%
+  kable(digits = 2, col.names = c("Jar Size", "Percentage"))%>%
+  kable_styling()
+```
+
+From this data we can see that the most popular jar size is 340g. As we collect more
+data we'll track how this changes over time. Even after 6 months of data we can
+say that jar sizes are slowly decreasing and beekeepers are erring towards
+smaller jars. 
+
+_The smaller jar sizes coincides with more vendors offering "rare", single apiary
+honey._ 
+
+## How much to sell it for?
+
+Adding the price per kilo to the above table tells us that prices start to decrease dramatically after 240g. We reviewed the sites selling the 227g and 240g jars, they are
+remarkably similar and most likely come from the same supplier (Compak South). These jars
+have a 2 filling points: to the neck and above the neck. 227g looks to represent those filled to the next. We merged 240g and 250g together for the summary below, but these jars can hold approximately 270g of honey.
+
+```{r echo = FALSE}
+
+honey %>% 
+  group_by(weight_bucket) %>%
+  summarize(total_weights = sum(weight_bucket), ppk = mean(price_per_kilo))%>%
+  mutate(pct = total_weights / sum(total_weights) * 100) %>%
+  select("weight_bucket", "pct", "ppk") %>%
+  kable(digits = 2, col.names = c("Jar Size", "Percentage", "£/kg")) %>%
+  kable_styling()
+```
+
+Combining this data with jar suppliers catalogs has allowed me to decide that the best
+jar size is 240g as the margins are 7.91% better.
+
+<!--
+## Does price per kilo vary by location? 
+By using postcode data, joined with longitude and latitude, we can map the volume of products for sale and average prices by region. I will map products and average prices geographically, colouring the points by average price per kilo, and alter the size of points based on units for sale in that area across the time frame.
+-->
+
+```{r echo = FALSE}
+
+# honey <- honey %>%
+#   filter(!is.na(lat), !is.na(long))
+# 
+# library(rgdal)
+# library(leaflet)
+# library(sf)
+# require(maps)
+# require(sp)
+# 
+# 
+# bins <- c(0, 10, 20, 50, 100, 200, 500, 1000, Inf)
+# #pal <- colorBin("YlOrRd", domain = honey$county, bins = bins)
+# 
+# counties <- readOGR(dsn = "_data/Map_UK.shp", GDAL1_integer64_policy = TRUE)
+# counties <- spTransform(counties, CRS(latlong))
+# ss <- subset(counties, counties$HASC_2 %in% c("GB.LI"))
+# ss <- spTransform(ss, CRS(latlong))
+# str(ss@data$NAME_2)
+# levels(ss@data$HASC_2)
+# #"GB.LC" "GB.LD" "GB.LE" "GB.LI" "GB.LM" "GB.LN"
+# #[101] "GB.LR" "GB.LT" "GB.LU" "GB.LW"
+# 
+# bath = ss[ss$HASC_2=="GB.LI",]
+# plot(ss)
+# coordinates(bath) <- ~ lat + long
+# h2 <- head(honey, 1)
+# over(h2, as(bath, "SpatialPolygons"))
+# 
+# latlong = "+init=epsg:4326"
+# 
+#  %>%
+#   mutate(county=cbind(h2, over(h2, counties))) %>% 
+#   select(c(lat, long, "county")) %>%
+#   View()
+
+#counties$HASC_2 %>% View()
+
+```
+
+```{r echo=FALSE}
+
+#testPoints <- SpatialPoints(cbind(c(51.3795766, 52.2718369), c(-2.3659479, -1.6071676)), proj4string=CRS(latlong))
+
+#proj4string(testPoints) <- proj4string(counties)
+#inside.park <- !is.na(over(testPoints, as(counties, "SpatialPolygons")))
+#head(inside.park)
+
+#coordinates(honey) <- ~ long + lat
+#proj4string(honey) <- proj4string(ss)
+#over(honey, ss)
+#over(ss, honey)
+
+#buff_xy <- spTransform(ss, CRS("+proj=longlat +datum=WGS84"))
+
+
+#leaflet(ss, options = leafletOptions(zoomControl = FALSE)) %>%
+#  setView(lng = -2, lat = 54, zoom = 6) %>%
+#  addTiles() %>%
+#  addPolygons(data=buff_xy, color = "green", fillColor = ~pal(honey$county), weight=1)
+  #addMarkers(~long, ~lat, popup = ~as.character(supplier), label = ~as.character(supplier))
+
+
+
+```
+
+# References
