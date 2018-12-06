@@ -7,9 +7,9 @@
 
 
 ## Current topics:
-* **Health:** *Over the counter drugs* - an exploration of common side effects of everyday medication
-* **Sport:** *Professional Squash* - Movement and gameplay in one of the worlds most physically demanding sports
-* **Music:** *Advertising through song* - An examination of *"brand-dropping"* (name-dropping brands) in popular music
-* **Business:** *Honey I shrunk the jars* - Analysis of product data in the UK honey industry
+* **Health:** *Over the counter* - An exploration of common side effects of everyday medication
+* **Sport:** *Boast and drive* - Movement and gameplay in professional squash; one of the worlds most physically demanding sports
+* **Music:** *Advertising in your ears* - An examination of *"brand-dropping"* (name-dropping brands) in popular music
+* **Business:** *Honey, I shrunk the jars* - Analysis of product data in the UK honey industry
 
 <br /><br />
