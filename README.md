@@ -1,4 +1,4 @@
-# *arguably
+# <span style=“color:red;”> *arguably </span>
 
 ## What is *\*arguably*?
 ***\*arguably*** is a group of researchers and programmers who aim to generate meaningful (and at times divisive) insights on a whole range of socially important topics. We explore the data of the everyday, and look for new meaning and engaging ways to understand things. If QI did data journalism, it would look a bit like this<sup>1</sup>.
