@@ -1,0 +1,142 @@
+---
+title: "Arguably the most average chocolate chip cookie"
+author: "Byron Williams"
+date: "2018-12-07"
+output: html_document
+bibliography: _data/references.bib # http://editor.citationstyles.org/styleInfo/?styleId=http%3A%2F%2Fwww.zotero.org%2Fstyles%2Fspringer-vancouver-brackets
+csl: _data/references.csl
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE, fig.width=8, fig.height=8)
+avg_percent_sugar <- 1
+```
+
+Inspired by The Pudding's article on [Baking the Most Average Chocolate Chip Cookie](https://pudding.cool/2018/05/cookies/#predictive)
+I wanted a recipe which doesn't have 60 ingredients! Cookies are great because
+they are simple to bake and are rather tasty. Once you've perfected your basic
+cookie dough recipe you can branch out and craft some more interesting flavours
+such as Cranberry & White Chocolate, Ginger Ginger or Praline & Milk from
+[Ben's Cookies](https://www.benscookies.com/our-cookies/).
+
+We've taken 13 recipes from UK blogs and foodie websites and averaged out the
+ingredients. We've simplied the ingredients and have converted things like salted
+butter into unsalted butter, and added the relevant percentage of salt
+
+## Ingredients
+
+Taking a Felicity Cloake approach to baking the most average chocolate chip
+cookie let's start with the core ingredients:
+
+### Butter
+
+Salted, or unsalted? Most recipies (%) use unsalted butter. For the minority
+that do not, we have converted the salted butter to unsalted in the following
+way:
+
+```
+var saltedButter = 200
+var saltPer100g = 1.7
+var salt = saltedButter / 100 * saltPer100g
+
+totals["butter unsalted"] += saltedButter - salt
+totals["salt"] += salt
+```
+
+It's always better to use unsalted butter because you know exactly how much salt
+you are adding to your recipe. Salt found in supermarkets ranges from 1%
+[@Ocado2018a] to 2% [@Ocado2018].
+
+### Sugar
+
+There is a lot of variation in sugars used by the recipies:
+
+- Granulated sugar
+- Caster sugar - normal and golden
+- Brown sugar - light and dark
+- Muscovado sugar - light
+- Icing sugar
+
+### Egg
+
+Definitely need one
+
+### Flour
+
+A few of the recipies call for self-raising flour. Again, to create a recipe
+that isn't 60 ingredients long we have converted the self-raing flour to
+plain flour and then added baking powder to compensate. As we've seen that one
+brand of butter can have twice as much as another you can expect variation
+with the self-raising flours too. Unfortunately data on the actual percentage
+of leavening agents such as Baking Powder, Cream of Tartar and Mono Calcium
+Phosphate is pretty hard to come by.
+
+Standard plain flour is perfectly fine. No recipes have called for bread flours
+or wholemeal flours.
+
+### Raising agent
+
+Soft and well risen cookies are what the average chocolate chip cookies aspires
+to be. Baking powder is far more prevelent amongst the recipes, this finding is
+different to Cloake's findings. Our recipes do not come from the books Cloake
+was using. Maybe professional bakers prefer Bicarbonate of Soda to Baking powder
+because the chocolate has enough acidity to activate the bicarb alone?
+
+<!-- https://www.nowtolove.com.au/how-to/expert-qa/baking-soda-bicarb-soda-baking-powder-what-is-the-difference-15828 -->
+
+### Salt
+
+Sharon Terenzi from the Chocolate Journalist [writes](https://thechocolatejournalist.com/salt-chocolate/) [@Terenzi2018]
+that chocolate
+
+> can be used to enhance sweetness, a more substantial amount of salt can be useful to actually contrast the sweetness of a chocolate
+
+Adding salt to the recipe is a must. I think that adding more salt is better to
+encourage the contrast because a whopping `r avg_percent_sugar`% of the
+recipe is already sugar.
+
+### Chocolate
+
+Always use chunks. Buy some chocolate and bash it or chop it up into chunks.
+
+All recipies use either Dark (%), Plain (%) or Milk Chocolate (%), or perhaps
+a bit of both (%). Whilst a critical part of the recipe the most critital thing
+is that you use enough.
+
+Heathwise I'd go for dark chocolate as each cookie is already % sugar.
+
+## The Method
+
+This recipe simply takes Edd Kimber's "The Ultimate Chocolate Chip Cookie"
+however the average chocolate chip cookies uses significantly less chocolate,
+a 1/4 less sugar than his and a 1/5 less flour. So these are completly
+
+The method closest to the ingredients is .....
+
+## The Recipe
+
+```
+---
+Total Cookies to make: 12
+---
+          ingredient:     grams   percent
+-----------------------------------------
+                 egg:	  68.18	(  9.44%)
+                salt:	   2.66	(  0.37%)
+           chocolate:	 145.44	( 20.14%)
+         plain flour:	 207.04	( 28.67%)
+         sugar brown:	 100.51	( 13.92%)
+        sugar caster:	  75.13	( 10.40%)
+       baking powder:	   3.32	(  0.46%)
+     butter unsalted:	 115.84	( 16.04%)
+     vanilla extract:	   3.56	(  0.49%)
+ bicarbonate of soda:	   0.59	(  0.08%)
+-----------------------------------------
+               total:	 722.27	(100.00%)
+          per cookie:	  60.19
+```
+
+
+# References

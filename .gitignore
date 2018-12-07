@@ -37,3 +37,8 @@ rsconnect/
 
 *.html
 packrat/lib*/
+.Rproj.user
+_data
+.RData
+.Rhistory
+public/

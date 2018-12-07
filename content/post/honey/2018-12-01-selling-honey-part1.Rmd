@@ -189,6 +189,12 @@ By using postcode data, joined with longitude and latitude, we can map the volum
 
 ```{r echo = FALSE}
 
+# https://pudding.cool/2017/03/hamilton/
+# https://talesofr.wordpress.com/2017/08/18/starting-a-rmarkdown-blog-with-bookdown-hugo-github/
+# https://github.com/Robinlovelace/Creating-maps-in-R
+# http://data-laborer.eu/data%20visualisation/MapUKpartI/
+# https://rstudio.github.io/leaflet/choropleths.html
+
 # honey <- honey %>%
 #   filter(!is.na(lat), !is.na(long))
 # 
